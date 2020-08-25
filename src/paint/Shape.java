@@ -12,7 +12,6 @@ abstract public class Shape implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private char state;
 	private int xpos_1;
 	private int ypos_1;
 	private int xpos_2;
@@ -36,14 +35,13 @@ abstract public class Shape implements Serializable{
 	public Shape() {
 	}
 	
-	public Shape(int x1, int y1, char state, Color color_line, Color color_fill,int lineThickness) {
+	public Shape(int x1, int y1,Color color_line, Color color_fill, int lineThickness) {
 		this.xpos_1 = x1;
 		this.ypos_1 = y1;
 		this.xpos_2 = x1 + 10;
 		this.ypos_2 = y1 + 10;
 		this.color_line = color_line;
 		this.color_fill = color_fill;
-		this.setState(state);
 		this.lineThickness = lineThickness;
 	}
 	
@@ -156,7 +154,6 @@ abstract public class Shape implements Serializable{
 	}
 
 	public void setMousePoint_y(int y) {
-		// TODO Auto-generated method stub
 		mousePoint_y = y;
 	}
 	public void swap() {
@@ -200,13 +197,6 @@ abstract public class Shape implements Serializable{
 		this.selectedPoint = selectedPoint;
 	}
 
-	public char getState() {
-		return state;
-	}
-
-	public void setState(char state) {
-		this.state = state;
-	}
 	public Color getColor_fill() {
 		return color_fill;
 	}
@@ -288,130 +278,120 @@ abstract public class Shape implements Serializable{
 	}
 }
 
-class SlctArea extends Shape {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	public int[] slctXpos = new int[9];
-	public int[] slctYpos = new int[9];	
-	public Shape focus;
-
-	public SlctArea(int xpos_1, int xpos_2, int ypos_1, int ypos_2, char state, Shape focus) {
-		slctXpos[0] = xpos_1;
-		slctXpos[1] = (xpos_1 + xpos_2) / 2;
-		slctXpos[2] = xpos_2;
-		slctXpos[3] = xpos_2;
-		slctXpos[4] = xpos_2;
-		slctXpos[5] = (xpos_1 + xpos_2) / 2;
-		slctXpos[6] = xpos_1;
-		slctXpos[7] = xpos_1;
-				
-		slctYpos[0] = ypos_1;
-		slctYpos[1] = ypos_1;
-		slctYpos[2] = ypos_1;
-		slctYpos[3] = (ypos_1 + ypos_2) / 2;
-		slctYpos[4] = ypos_2;
-		slctYpos[5] = ypos_2;		
-		slctYpos[6] = ypos_2;
-		slctYpos[7] = (ypos_1 + ypos_2) / 2;
-		
-		slctYpos[8] = ypos_1-60;
-		slctXpos[8] = (xpos_1 + xpos_2)/2;
-		
-		this.focus = focus;
-		setState(state);
-	}
-	@Override
-	public boolean isInside(int x, int y) {
-		if (!focus.getPointEdit()) {
-			for (int i = 0; i < 9; i++){
-				if( x <= slctXpos[i] + 5 && x >= slctXpos[i] - 5 && y <= slctYpos[i] + 5 && y >= slctYpos[i] - 5)
-					return true;
-			}
-		}
-		else {
-			for(int i = 0; i < focus.getXpolyPoints().size(); i++) {
-				if(focus.getXpolyPoints().get(i) - 5 < x && focus.getXpolyPoints().get(i) + 5 > x && focus.getYpolyPoints().get(i) - 5 < y && focus.getYpolyPoints().get(i) + 5 > y) {
-					focus.setSelectedPoint(i);
-					return true;
-				}
-			}
-				
-		}
-		return false;
-	}
-	
-	@Override
-	public void draw(Graphics g) {
-		ArrayList<Integer> Xdots;
-		ArrayList<Integer> Ydots;
-		
-		((Graphics2D) g).setStroke(new BasicStroke(1));
-		
-		((Graphics2D)g).rotate(focus.getDegree(), focus.getRotate_center_x(), focus.getRotate_center_y());
-		if(getState()=='l') {
-			g.setColor(Color.white);
-			g.fillOval(slctXpos[4]-5, slctYpos[4]-5, 11, 11);
-			g.fillOval(slctXpos[0]-5, slctYpos[0]-5, 11, 11);
-			
-			g.setColor(Color.gray);
-			g.drawOval(slctXpos[4]-5, slctYpos[4]-5, 11, 11);
-			g.drawOval(slctXpos[0]-5, slctYpos[0]-5, 11, 11);
-		}
-		else{
-			if(!focus.getPointEdit()) {
-				g.setColor(Color.gray);
-				g.drawRect(slctXpos[0], slctYpos[0], slctXpos[4] - slctXpos[0], slctYpos[4] - slctYpos[0]);
-				g.drawLine(slctXpos[8], slctYpos[8], slctXpos[1], slctYpos[1]);
-
-				for(int i =0; i < 9; i++) {
-					g.setColor(Color.white);
-					g.fillOval(slctXpos[i]-5, slctYpos[i]-5, 11, 11);
-					g.setColor(Color.gray);
-					g.drawOval(slctXpos[i]-5, slctYpos[i]-5, 11, 11);
-				}
-			}
-			else {
-				Xdots = focus.getXpolyPoints();
-				Ydots = focus.getYpolyPoints();
-				
-				for(int i =0; i < Xdots.size(); i++) {
-					g.setColor(Color.white);
-					g.fillOval(Xdots.get(i)-5, Ydots.get(i)-5, 11, 11);
-					g.setColor(Color.gray);
-					g.drawOval(Xdots.get(i)-5, Ydots.get(i)-5, 11, 11);
-				}
-			}
-		}
-		((Graphics2D)g).rotate(-focus.getDegree(), focus.getRotate_center_x(), focus.getRotate_center_y());
-	}
-	@Override
-	boolean getComplete() {
-		return false;
-	}
-	@Override
-	void setComplete() {
-	}
-	@Override
-	void remove_xy() {
-	}
-	@Override
-	boolean getPointEdit() {
-		return false;
-	}
-	@Override
-	void setPointEdit(boolean pointEdit) {
-	}
-	@Override
-	ArrayList<Integer> getXpolyPoints() {
-		return null;
-	}
-	@Override
-	ArrayList<Integer> getYpolyPoints() {
-		return null;
-	}
-}
+//class SlctArea extends Shape {
+//	/**
+//	 * 
+//	 */
+//	private static final long serialVersionUID = 1L;
+//	public int[] slctXpos = new int[9];
+//	public int[] slctYpos = new int[9];	
+//	public Shape focus;
+//
+//	public SlctArea(int xpos_1, int xpos_2, int ypos_1, int ypos_2, char state, Shape focus) {
+//		slctXpos[0] = xpos_1;
+//		slctXpos[1] = (xpos_1 + xpos_2) / 2;
+//		slctXpos[2] = xpos_2;
+//		slctXpos[3] = xpos_2;
+//		slctXpos[4] = xpos_2;
+//		slctXpos[5] = (xpos_1 + xpos_2) / 2;
+//		slctXpos[6] = xpos_1;
+//		slctXpos[7] = xpos_1;
+//				
+//		slctYpos[0] = ypos_1;
+//		slctYpos[1] = ypos_1;
+//		slctYpos[2] = ypos_1;
+//		slctYpos[3] = (ypos_1 + ypos_2) / 2;
+//		slctYpos[4] = ypos_2;
+//		slctYpos[5] = ypos_2;		
+//		slctYpos[6] = ypos_2;
+//		slctYpos[7] = (ypos_1 + ypos_2) / 2;
+//		
+//		slctYpos[8] = ypos_1-60;
+//		slctXpos[8] = (xpos_1 + xpos_2)/2;
+//		
+//		this.focus = focus;
+//	}
+//	public boolean isInside(int x, int y) {
+//		if (!focus.getPointEdit()) {
+//			for (int i = 0; i < 9; i++){
+//				if( x <= slctXpos[i] + 5 && x >= slctXpos[i] - 5 && y <= slctYpos[i] + 5 && y >= slctYpos[i] - 5)
+//					return true;
+//			}
+//		}
+//		else {
+//			for(int i = 0; i < focus.getXpolyPoints().size(); i++) {
+//				if(focus.getXpolyPoints().get(i) - 5 < x && focus.getXpolyPoints().get(i) + 5 > x && focus.getYpolyPoints().get(i) - 5 < y && focus.getYpolyPoints().get(i) + 5 > y) {
+//					focus.setSelectedPoint(i);
+//					return true;
+//				}
+//			}
+//				
+//		}
+//		return false;
+//	}
+//	
+//	public void draw(Graphics g) {
+//		ArrayList<Integer> Xdots;
+//		ArrayList<Integer> Ydots;
+//		
+//		((Graphics2D) g).setStroke(new BasicStroke(1));
+//		
+//		((Graphics2D)g).rotate(focus.getDegree(), focus.getRotate_center_x(), focus.getRotate_center_y());
+//		//if(getState()=='l') {
+//			g.setColor(Color.white);
+//			g.fillOval(slctXpos[4]-5, slctYpos[4]-5, 11, 11);
+//			g.fillOval(slctXpos[0]-5, slctYpos[0]-5, 11, 11);
+//			
+//			g.setColor(Color.gray);
+//			g.drawOval(slctXpos[4]-5, slctYpos[4]-5, 11, 11);
+//			g.drawOval(slctXpos[0]-5, slctYpos[0]-5, 11, 11);
+//		//}
+//		//else{
+//			if(!focus.getPointEdit()) {
+//				g.setColor(Color.gray);
+//				g.drawRect(slctXpos[0], slctYpos[0], slctXpos[4] - slctXpos[0], slctYpos[4] - slctYpos[0]);
+//				g.drawLine(slctXpos[8], slctYpos[8], slctXpos[1], slctYpos[1]);
+//
+//				for(int i =0; i < 9; i++) {
+//					g.setColor(Color.white);
+//					g.fillOval(slctXpos[i]-5, slctYpos[i]-5, 11, 11);
+//					g.setColor(Color.gray);
+//					g.drawOval(slctXpos[i]-5, slctYpos[i]-5, 11, 11);
+//				}
+//			}
+//			else {
+//				Xdots = focus.getXpolyPoints();
+//				Ydots = focus.getYpolyPoints();
+//				
+//				for(int i =0; i < Xdots.size(); i++) {
+//					g.setColor(Color.white);
+//					g.fillOval(Xdots.get(i)-5, Ydots.get(i)-5, 11, 11);
+//					g.setColor(Color.gray);
+//					g.drawOval(Xdots.get(i)-5, Ydots.get(i)-5, 11, 11);
+//				}
+//			}
+//		//}
+//		((Graphics2D)g).rotate(-focus.getDegree(), focus.getRotate_center_x(), focus.getRotate_center_y());
+//	}
+//	boolean getComplete() {
+//		return false;
+//	}
+//	void setComplete() {
+//	}
+//	void remove_xy() {
+//	}
+//	boolean getPointEdit() {
+//		return false;
+//	}
+//	void setPointEdit(boolean pointEdit) {
+//	}
+//	ArrayList<Integer> getXpolyPoints() {
+//		return null;
+//	}
+//	ArrayList<Integer> getYpolyPoints() {
+//		return null;
+//	}
+//}
 
 class Rectangle extends Shape{
 	/**
@@ -419,8 +399,8 @@ class Rectangle extends Shape{
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public Rectangle(int x1, int y1, char state, Color color_line, Color color_fill, int lineThickness) {
-		super(x1, y1, state, color_line, color_fill, lineThickness);
+	public Rectangle(int x1, int y1, Color color_line, Color color_fill, int lineThickness) {
+		super(x1, y1, color_line, color_fill, lineThickness);
 	}
 	
 	public boolean isInside(int x, int y) {
@@ -440,28 +420,21 @@ class Rectangle extends Shape{
 		g.drawRect(getXpos_1(), getYpos_1(), getXpos_2()-getXpos_1(), getYpos_2()-getYpos_1());
 		((Graphics2D)g).rotate(-getDegree(),getRotate_center_x(), getRotate_center_y());
 	}
-	@Override
 	boolean getComplete() {
 		return false;
 	}
-	@Override
 	void setComplete() {
 	}
-	@Override
 	void remove_xy() {
 	}
-	@Override
 	boolean getPointEdit() {
 		return false;
 	}
-	@Override
 	void setPointEdit(boolean pointEdit) {		
 	}
-	@Override
 	ArrayList<Integer> getXpolyPoints() {
 		return null;
 	}
-	@Override
 	ArrayList<Integer> getYpolyPoints() {
 		return null;
 	}
@@ -473,8 +446,8 @@ class Ellipse extends Shape{
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public Ellipse(int x1, int y1, char state, Color color_line, Color color_fill, int lineThickness) {
-		super(x1, y1, state, color_line, color_fill, lineThickness);
+	public Ellipse(int x1, int y1, Color color_line, Color color_fill, int lineThickness) {
+		super(x1, y1, color_line, color_fill, lineThickness);
 	}
 	
 	public boolean isInside(int x, int y) {
@@ -493,28 +466,21 @@ class Ellipse extends Shape{
 		g.drawOval(getXpos_1(), getYpos_1(), getXpos_2()-getXpos_1(), getYpos_2()-getYpos_1());
 		((Graphics2D)g).rotate(-getDegree(),getRotate_center_x(), getRotate_center_y());
 	}
-	@Override
 	boolean getComplete() {
 		return false;
 	}
-	@Override
 	void setComplete() {
 	}
-	@Override
 	void remove_xy() {
 	}
-	@Override
 	boolean getPointEdit() {
 		return false;
 	}
-	@Override
 	void setPointEdit(boolean pointEdit) {		
 	}
-	@Override
 	ArrayList<Integer> getXpolyPoints() {
 		return null;
 	}
-	@Override
 	ArrayList<Integer> getYpolyPoints() {
 		return null;
 	}
@@ -526,8 +492,8 @@ class Triangle extends Shape{
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public Triangle(int x1, int y1, char state, Color color_line, Color color_fill,int lineThickness) {
-		super(x1, y1, state, color_line, color_fill, lineThickness);
+	public Triangle(int x1, int y1, Color color_line, Color color_fill,int lineThickness) {
+		super(x1, y1, color_line, color_fill, lineThickness);
 	
 		xPos = new int[3];
 		yPos = new int[3];
@@ -563,34 +529,27 @@ class Triangle extends Shape{
 		((Graphics2D)g).rotate(-getDegree(),getRotate_center_x(), getRotate_center_y());
 	}
 
-	@Override
 	boolean getComplete() {
 		return false;
 	}
 
-	@Override
 	void setComplete() {
 	}
 
-	@Override
 	void remove_xy() {
 	}
 
-	@Override
 	boolean getPointEdit() {
 		return false;
 	}
 
-	@Override
 	void setPointEdit(boolean pointEdit) {
 	}
 
-	@Override
 	ArrayList<Integer> getXpolyPoints() {
 		return null;
 	}
 
-	@Override
 	ArrayList<Integer> getYpolyPoints() {
 			return null;
 	}
@@ -603,8 +562,8 @@ class Diamond extends Shape{
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public Diamond(int x1, int y1, char state, Color color_line, Color color_fill, int lineThickness) {
-		super(x1, y1, state, color_line, color_fill, lineThickness);
+	public Diamond(int x1, int y1, Color color_line, Color color_fill, int lineThickness) {
+		super(x1, y1, color_line, color_fill, lineThickness);
 	
 		xPos = new int[4];
 		yPos = new int[4];
@@ -696,8 +655,8 @@ class Pen extends Shape{
 	private ArrayList<Double> Yprops = new ArrayList<Double>();
 	public int temp = 0;
 	
-	public Pen(int x1, int y1, char state, Color color_line, Color color_fill, int lineThickness) {
-		super(x1, y1, state, color_line, color_fill, lineThickness);
+	public Pen(int x1, int y1, Color color_line, Color color_fill, int lineThickness) {
+		super(x1, y1, color_line, color_fill, lineThickness);
 	
 		XpenPoints.add(x1);
 		XpenPoints.add(x1);
@@ -878,8 +837,8 @@ class Line extends Shape {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public Line(int x1, int y1, char state, Color color_line, Color color_fill, int lineThickness) {
-		super(x1, y1, state, color_line, color_fill, lineThickness);
+	public Line(int x1, int y1, Color color_line, Color color_fill, int lineThickness) {
+		super(x1, y1, color_line, color_fill, lineThickness);
 	}
 	
 	public void resize(int x, int y){
@@ -974,8 +933,8 @@ class Polygon extends Shape {
 	private ArrayList<Double> Xprops = new ArrayList<Double>();
 	private ArrayList<Double> Yprops = new ArrayList<Double>();
 	
-	public Polygon(int x1, int y1, char state, Color color_line, Color color_fill, int lineThickness) {
-		super(x1, y1, state, color_line, color_fill, lineThickness);
+	public Polygon(int x1, int y1, Color color_line, Color color_fill, int lineThickness) {
+		super(x1, y1, color_line, color_fill, lineThickness);
 		
 		XpolyPoints.add(x1);
 		YpolyPoints.add(y1);
